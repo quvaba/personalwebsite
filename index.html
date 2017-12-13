@@ -1,0 +1,338 @@
+<!DOCTYPE HTML>
+<head>
+  <title>Hi</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:600,900|Open+Sans" rel="stylesheet">
+
+  <style>
+    *{
+      margin: 0;
+    }
+    h1 {
+      margin: -.2em -.1em;
+      font-family: Montserrat, sans-serif; font-size: 6.5em; font-weight: 900;
+      color: #ff426a;
+      letter-spacing: -.07em;
+      transform: scale(1, 1.2);
+      -webkit-transform: scale(1, 1.2);
+      -moz-transform: scale(1, 1.2);
+      -ms-transform: scale(1, 1.2);
+      -o-transform: scale(1, 1.2);
+      z-index: 1000;
+      position:absolute;
+    }
+
+    h2{
+      font-family: Montserrat, sans-serif; font-weight: 600;
+      z-index: 1000;
+      font-size: 1.5em;
+    }
+
+    .info{
+      width: 100%; height: 100%; text-align: center; margin-top: 11em;
+      z-index: 950;
+      position:absolute;
+      visibility: hidden;
+    }
+
+    a{
+      color: #70bad3;
+      cursor:crosshair;
+      z-index: 1001;
+      position:relative;
+    }
+
+    a:hover{
+      color: #2c75ff;
+    }
+
+
+    table{
+      height: 100%; margin-top: 48vh;
+      margin-left: 20vw;
+      position:absolute;
+      z-index: 955;
+    }
+
+    th{
+      font-size: 2.5em; font-family: Montserrat; font-weight: 600; color: #70bad3;
+      padding: 0em .4em; text-align: center;
+      z-index: 1000;
+    }
+
+    p{
+      font-family: "Open Sans", sans-serif; font-size: .9em;
+      text-align: center;
+      padding: 1em;
+      top: 7vh;
+      left: 29vw;
+      width: 40vw;
+      z-index: 1000;
+      position:absolute;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    canvas { width: 100%; height: 100%; z-index: -100;}
+
+  </style>
+</head>
+
+<body>
+  <!--================HTML STUFF================-->
+
+
+  <h1>Yanming Wen.</h1>
+  <div class = "info" id = "intro">
+    <h2 style = "color: #ffa10c">INTRODUCTION</h2>
+    <p>Hey! You can call me Ming. I'm a freshman studying CS at UIUC.
+      <br><br>
+      In my spare time I like to make things like this website
+      (though hopefully better-looking than this hot mess).
+      <br><br>
+      I like eggs, but maybe not enough to warrant their excessive usage here...?
+    </p>
+  </div>
+
+  <div class = "info" id = "skills">
+    <h2 style = "color: #34d15b">SKILLS</h2>
+    <p>
+      I'm proficient in Java, though I've yet to make a big project with it.
+      <br><br>
+      Most of my experience is with web development. I have worked with HTML,
+      CSS, and Javascript extensively. I can also work with PHP and SQL
+      if need be. <br><br>
+      I've developed some applications using the AngularJS framework, like a
+      a schedule visualizer. <br><br>
+      My latest obsession is three.js. So far I'm kind of clumsy with it but
+      I'm trying my best.
+    </p>
+  </div>
+
+  <div class = "info" id = "focus">
+    <h2 style = "color: #ff72a1">FOCUS</h2>
+    <p>
+      My main interests are web development, app development,
+      and security.<br><br>
+      I'm about to finish CS 125 (Intro) and will be taking
+      CS 173 (Discrete Structures) and CS 126 (Software Development Studio)
+      next semester.
+    </p>
+  </div>
+
+  <div class = "info" id = "sites">
+    <h2 style = "color: #7187ff">SITES</h2>
+    <p>I'm quvaba on GitHub :)</p>
+  </div>
+
+  <table>
+    <th><a href="javascript:void(0)" onclick="display(1)">intro</a></th>
+    <th>+</th>
+    <th><a href="javascript:void(0)" onclick="display(2)">skills</a></th>
+    <th>+</th>
+    <th><a href="javascript:void(0)" onclick="display(3)">focus</a></th>
+    <th>+</th>
+    <th><a href="javascript:void(0)" onclick="display(4)">sites</a></th>
+  </table>
+
+
+  <!--================JS STUFF================-->
+  <script src="https://threejs.org/build/three.js"></script>
+  <script>
+      var scene, camera, renderer;
+      var introVisible = false, skillsVisible = false,
+        focusVisible = false, sitesVisible = false;
+      var eggCarton = [];
+      var strayEggs = [];
+
+      init();
+      animate();
+
+      function init(){
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0xb0dee8 );
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        camera.position.z = 20;
+        camera.position.y = 4;
+
+        //Lights
+        var directionalLight = new THREE.DirectionalLight( 0xf9a4c5, .3 );
+        directionalLight.position.y = 15;
+        directionalLight.position.z = 15;
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 1000;
+        directionalLight.shadow.mapSize.height = 1000;
+        directionalLight.shadow.camera.near = 10;
+        directionalLight.shadow.camera.far = 200;
+
+        scene.add( directionalLight );
+
+        /*var helper = new THREE.CameraHelper( directionalLight.shadow.camera );
+        scene.add(helper);*/
+
+        var ambientLight = new THREE.AmbientLight( 0xffffff, .9 );
+        scene.add( ambientLight );
+
+        //Build ground
+        var bgeo = new THREE.BoxGeometry(window.innerWidth * .02, .1, window.innerHeight/70);
+        var bmat = new THREE.MeshLambertMaterial({color:0xb0dee8});
+        bg = new THREE.Mesh(bgeo, bmat);
+        bg.position.z = 10;
+        bg.position.y = window.innerHeight/10 * -.05;
+        bg.castShadow = false;
+        bg.receiveShadow = true;
+        scene.add(bg);
+        directionalLight.target = bg;
+
+        //egg hell
+        var topPoints = [];
+        for ( var deg = 90; deg <= 180; deg += 6 ) {
+
+            var rad = Math.PI * deg / 180;
+            var point = new THREE.Vector2( ( 0.72 + .08 * Math.cos( rad ) ) * Math.sin( rad ), - Math.cos( rad ) ); // the "egg equation"
+            topPoints.push( point );
+
+        }
+
+        eggTopGeo = new THREE.LatheBufferGeometry( topPoints, 32 );
+        eggMat = new THREE.MeshPhongMaterial({side: THREE.DoubleSide});
+
+        var bottomPoints = [];
+        for ( var deg = 0; deg <= 90; deg += 6 ) {
+
+            var rad = Math.PI * deg / 180;
+            var point = new THREE.Vector2( ( 0.72 + .08 * Math.cos( rad ) ) * Math.sin( rad ), - Math.cos( rad ) - 1 ); // the "egg equation"
+            bottomPoints.push( point );
+
+        }
+
+        eggBottomGeo = new THREE.LatheBufferGeometry( bottomPoints, 32 );
+
+        //make the actual eggs
+        introEggTop = new THREE.Mesh(eggTopGeo, eggMat);
+        introEggBottom = new THREE.Mesh(eggBottomGeo, eggMat);
+        eggCarton.push(new Egg("intro", introEggTop, introEggBottom, 0xffda0c, -4));
+
+        skillsEggTop = new THREE.Mesh(eggTopGeo, eggMat);
+        skillsEggBottom = new THREE.Mesh(eggBottomGeo, eggMat);
+        eggCarton.push(new Egg("intro", skillsEggTop, skillsEggBottom, 0x60ff88, -1.4));
+
+        focusEggTop = new THREE.Mesh(eggTopGeo, eggMat);
+        focusEggBottom = new THREE.Mesh(eggBottomGeo, eggMat);
+        eggCarton.push(new Egg("intro", focusEggTop, focusEggBottom, 0xff72a1, 1.4));
+
+        sitesEggTop = new THREE.Mesh(eggTopGeo, eggMat);
+        sitesEggBottom = new THREE.Mesh(eggBottomGeo, eggMat);
+        eggCarton.push(new Egg("intro", sitesEggTop, sitesEggBottom, 0x7187ff, 4));
+
+
+      }
+
+      function animate(){
+        //eggCarton[0].top.position.x -= 0.01;
+        //eggCarton[0].top.rotation.z += 0.01;
+
+        if (introVisible && eggCarton[0].top.position.x > -5.5){
+          eggCarton[0].top.position.x -= 0.2;
+          eggCarton[0].top.rotation.z += 0.3;
+        } else if (skillsVisible && eggCarton[1].top.position.z < 9){
+          eggCarton[1].top.position.z += 0.2;
+          eggCarton[1].top.rotation.x += 0.3;
+        } else if (focusVisible && eggCarton[2].top.position.z < 9){
+          eggCarton[2].top.position.z += 0.2;
+          eggCarton[2].top.rotation.x += 0.3;
+        } else if (sitesVisible && eggCarton[3].top.position.x < 5.5){
+          eggCarton[3].top.position.x += 0.2;
+          eggCarton[3].top.rotation.z -= 0.3;
+        }
+
+        if (!introVisible){
+          eggCarton[0].top.position.x = -4;
+          eggCarton[0].top.rotation.z = 0;
+        }
+        if (!skillsVisible){
+          eggCarton[1].top.position.z = 8;
+          eggCarton[1].top.rotation.x = 0;
+        }
+        if (!focusVisible){
+          eggCarton[2].top.position.z = 8;
+          eggCarton[2].top.rotation.x = 0;
+        }
+        if (!sitesVisible){
+          eggCarton[3].top.position.x = 4;
+          eggCarton[3].top.rotation.z = 0;
+        }
+
+
+        requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+      }
+
+      //EGG PROTOTYPE
+      function Egg(name, top, bottom, color, x){
+        this.name = name;
+
+        this.top = top;
+        this.bottom = bottom;
+        this.bottom.material = new THREE.MeshPhongMaterial({side: THREE.DoubleSide, color:color});
+
+        this.top.position.x = x;
+        this.top.position.y = -2;
+        this.top.position.z = 8;
+        this.top.castShadow = true;
+        this.top.receiveShadow = false;
+        scene.add(this.top);
+
+        this.bottom.position.x = x;
+        this.bottom.position.y = -1;
+        this.bottom.position.z = 8;
+        this.bottom.castShadow = true;
+        this.bottom.receiveShadow = false;
+        scene.add(this.bottom);
+      }
+
+      function display(itemNumber){
+        if (itemNumber == 1){
+          introVisible = true;
+          skillsVisible = false;
+          focusVisible = false;
+          sitesVisible = false;
+          document.getElementById("intro").style.visibility = "visible";
+          document.getElementById("skills").style.visibility = "hidden";
+          document.getElementById("focus").style.visibility = "hidden";
+          document.getElementById("sites").style.visibility = "hidden";
+        } else if (itemNumber == 2){
+          introVisible = false;
+          skillsVisible = true;
+          focusVisible = false;
+          sitesVisible = false;
+          document.getElementById("intro").style.visibility = "hidden";
+          document.getElementById("skills").style.visibility = "visible";
+          document.getElementById("focus").style.visibility = "hidden";
+          document.getElementById("sites").style.visibility = "hidden";
+        } else if (itemNumber == 3){
+          introVisible = false;
+          skillsVisible = false;
+          focusVisible = true;
+          sitesVisible = false;
+          document.getElementById("intro").style.visibility = "hidden";
+          document.getElementById("skills").style.visibility = "hidden";
+          document.getElementById("focus").style.visibility = "visible";
+          document.getElementById("sites").style.visibility = "hidden";
+        } else if (itemNumber == 4){
+          introVisible = false;
+          skillsVisible = false;
+          focusVisible = false;
+          sitesVisible = true;
+          document.getElementById("intro").style.visibility = "hidden";
+          document.getElementById("skills").style.visibility = "hidden";
+          document.getElementById("focus").style.visibility = "hidden";
+          document.getElementById("sites").style.visibility = "visible";
+        }
+      }
+  </script>
+</body>
